@@ -12,6 +12,18 @@ In this pattern:
 - **Semcheck MCP Server**: Provides tools and resources for code analysis
 - **No Direct LLM Usage**: Semcheck doesn't make direct LLM calls; it provides data and analysis capabilities
 
+## Prerequisites
+
+### For Process-based Connections (Recommended)
+- **Semcheck Installation**: Ensure `semcheck` binary is installed and accessible in your PATH
+- **Configuration File**: Create a `semcheck-mcp.yaml` configuration file with MCP enabled
+- **MCP Client**: Install a compatible MCP client (VS Code extension, Claude Desktop, etc.)
+
+### For TCP Connections
+- **Running Server**: Start semcheck MCP server manually before connecting
+- **Client Support**: Verify your MCP client supports TCP connections
+- **Network Access**: Ensure client can reach the server address and port
+
 ## Configuration
 
 ### MCP Server Configuration
@@ -64,31 +76,68 @@ This will:
 
 ### Using with External MCP Clients
 
-External MCP clients can connect to semcheck and use the provided tools:
+External MCP clients can connect to semcheck and use the provided tools. There are two main approaches:
 
-#### VS Code with MCP Extension
+#### Method 1: Process-based (Recommended)
+The MCP client starts the semcheck process directly:
+
+**VS Code with MCP Extension:**
 ```json
 {
   "mcp.servers": {
     "semcheck": {
-      "command": "tcp",
-      "args": ["localhost", "8080"]
+      "command": "semcheck",
+      "args": ["-config", "semcheck-mcp.yaml", "-mcp-server"]
     }
   }
 }
 ```
 
-#### Claude Desktop
+**Claude Desktop:**
 ```json
 {
   "mcpServers": {
     "semcheck": {
-      "command": "tcp",
-      "args": ["localhost", "8080"]
+      "command": "semcheck",
+      "args": ["-config", "semcheck-mcp.yaml", "-mcp-server"]
     }
   }
 }
 ```
+
+#### Method 2: TCP Connection
+Connect to an already running semcheck MCP server. Note that TCP connection support varies by MCP client implementation.
+
+**Prerequisites:**
+1. Start semcheck MCP server manually:
+   ```bash
+   semcheck -config semcheck-mcp.yaml -mcp-server
+   ```
+
+2. Configure your MCP client to connect to the running server (client-specific configuration required).
+
+**Important Notes:**
+- Not all MCP clients support direct TCP connections
+- Process-based approach is more widely supported and recommended
+- Refer to your MCP client's documentation for TCP connection syntax
+- Ensure the semcheck binary is in your PATH for process-based connections
+
+#### Client Compatibility
+
+**VS Code MCP Extension:**
+- Supports process-based connections
+- Configuration goes in VS Code settings or `.vscode/settings.json`
+- Refer to: [VS Code MCP documentation](https://github.com/modelcontextprotocol/vscode-mcp)
+
+**Claude Desktop:**
+- Supports process-based connections
+- Configuration goes in Claude Desktop's MCP settings
+- Refer to: [Claude Desktop MCP documentation](https://github.com/anthropics/claude-desktop-mcp)
+
+**Other MCP Clients:**
+- Check your client's documentation for supported connection methods
+- Process-based connections are generally more compatible
+- TCP connections may require client-specific configuration syntax
 
 ## MCP Tools
 
@@ -379,8 +428,8 @@ Connect VS Code or other IDEs to semcheck for real-time semantic analysis:
 {
   "mcp.servers": {
     "semcheck": {
-      "command": "tcp",
-      "args": ["localhost", "8080"]
+      "command": "semcheck",
+      "args": ["-config", "semcheck-mcp.yaml", "-mcp-server"]
     }
   }
 }
@@ -394,8 +443,8 @@ Use Claude Desktop with semcheck tools:
 {
   "mcpServers": {
     "semcheck": {
-      "command": "tcp",
-      "args": ["localhost", "8080"]
+      "command": "semcheck",
+      "args": ["-config", "semcheck-mcp.yaml", "-mcp-server"]
     }
   }
 }
@@ -469,19 +518,29 @@ The MCP implementation includes comprehensive error handling:
 ### Common Issues
 
 1. **Connection Refused**:
-   - Ensure MCP server is running
+   - Ensure MCP server is running (for TCP connections)
    - Check address and port configuration
    - Verify firewall settings
 
-2. **Unknown Tool/Resource**:
+2. **Command Not Found**:
+   - Ensure `semcheck` binary is in your PATH
+   - Use absolute path to semcheck if needed
+   - Verify semcheck is properly installed
+
+3. **Configuration Errors**:
+   - Check MCP client's configuration syntax
+   - Ensure config file path is correct
+   - Verify semcheck-mcp.yaml exists and is valid
+
+4. **Unknown Tool/Resource**:
    - Verify tool/resource names using `tools/list` or `resources/list`
    - Check spelling and case sensitivity
 
-3. **Invalid Parameters**:
+5. **Invalid Parameters**:
    - Verify parameter types and required fields
    - Check tool input schema using `tools/list`
 
-4. **File Not Found**:
+6. **File Not Found**:
    - Ensure file paths are correct and accessible
    - Check working directory and relative paths
 
